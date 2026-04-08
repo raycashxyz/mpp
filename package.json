@@ -1,0 +1,69 @@
+{
+  "name": "@raycash/mpp",
+  "version": "0.1.0",
+  "description": "Machine Payments Protocol SDK — pay-per-call API monetization with confidential payment channels",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
+    },
+    "./ows": {
+      "types": "./dist/ows.d.ts",
+      "import": "./dist/ows.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raycashxyz/mpp.git"
+  },
+  "homepage": "https://github.com/raycashxyz/mpp#readme",
+  "keywords": [
+    "mpp",
+    "payments",
+    "payment-channels",
+    "eip-712",
+    "fhe",
+    "confidential",
+    "micropayments",
+    "pay-per-call",
+    "api-monetization"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "mppx": "^0.4.7",
+    "viem": "^2.0.0"
+  },
+  "peerDependencies": {
+    "@open-wallet-standard/core": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@open-wallet-standard/core": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0"
+  }
+}
