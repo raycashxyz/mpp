@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "mppx": "^0.4.7",
-    "viem": "^2.0.0"
+    "viem": "catalog:"
   },
   "peerDependencies": {
     "@open-wallet-standard/core": ">=1.0.0"

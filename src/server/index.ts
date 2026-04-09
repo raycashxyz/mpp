@@ -13,7 +13,7 @@ import type { Address } from "viem";
 
 import { Method, Receipt } from "mppx";
 
-import { raycashChannel } from "../method";
+import { raycashChannel } from "../method.js";
 
 export interface RaycashServerConfig {
   currency: Address;
@@ -52,21 +52,20 @@ export function raycash (config: RaycashServerConfig): any {
         return { ...request, lastCumulative: "0" };
       }
 
-      try {
-        const res = await fetch(
-          `${config.raycashBaseUrl}/api/vouchers/latest?channelAddress=${encodeURIComponent(payload.channel)}`,
-          { headers: { "Authorization": `Bearer ${config.apiKey}` } },
-        );
+      const res = await fetch(
+        `${config.raycashBaseUrl}/api/vouchers/latest?channelAddress=${encodeURIComponent(payload.channel)}`,
+        {
+          headers: { "Authorization": `Bearer ${config.apiKey}` },
+          signal: AbortSignal.timeout(10_000),
+        },
+      );
 
-        if (res.ok) {
-          const data = await res.json() as { cumulativeAmount?: string };
-          return { ...request, lastCumulative: data.cumulativeAmount ?? "0" };
-        }
-      } catch {
-        // Network error — fall back to "0"
+      if (!res.ok) {
+        return { ...request, lastCumulative: "0" };
       }
 
-      return { ...request, lastCumulative: "0" };
+      const data = await res.json() as { cumulativeAmount?: string };
+      return { ...request, lastCumulative: data.cumulativeAmount ?? "0" };
     },
 
     async verify ({ credential }) {
@@ -74,6 +73,7 @@ export function raycash (config: RaycashServerConfig): any {
 
       const verifyRes = await fetch(`${config.raycashBaseUrl}/api/vouchers/verify`, {
         method: "POST",
+        signal: AbortSignal.timeout(10_000),
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${config.apiKey}`,
@@ -99,6 +99,7 @@ export function raycash (config: RaycashServerConfig): any {
 
       const submitRes = await fetch(`${config.raycashBaseUrl}/api/vouchers/submit`, {
         method: "POST",
+        signal: AbortSignal.timeout(10_000),
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${config.apiKey}`,

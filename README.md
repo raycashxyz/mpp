@@ -238,7 +238,7 @@ raycash-monorepo (private)          raycashxyz/mpp (public)           npm
 
 ## Related
 
-- [MPPWrapper contracts](../../contracts/docs/mpp/spec.md) — on-chain payment channel specification
-- [demo/weather-api](../../demo/weather-api/) — complete demo service
+- [MPPWrapper contracts](https://github.com/raycashxyz/raycash-monorepo/blob/main/contracts/docs/mpp/spec.md) — on-chain payment channel specification
+- [demo/weather-api](https://github.com/raycashxyz/raycash-monorepo/tree/main/demo/weather-api) — complete demo service
 - [mppx](https://github.com/wevm/mppx) — the underlying payment protocol framework
 - [raycashxyz/mpp](https://github.com/raycashxyz/mpp) — public mirror (npm publish source)

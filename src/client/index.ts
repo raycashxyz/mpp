@@ -14,7 +14,7 @@ import type { Account } from "viem/accounts";
 import { Credential, Method } from "mppx";
 import type { Challenge } from "mppx";
 
-import { raycashChannel } from "../method";
+import { raycashChannel } from "../method.js";
 
 const serviceChannels = new Map<string, Address>();
 const channelCumulatives = new Map<string, bigint>();
@@ -64,11 +64,13 @@ export function raycash (config: RaycashClientConfig): any {
             parsed.host = new URL(config.serviceOrigin).host;
             channelStateUrl = parsed.toString();
           }
-        } catch {}
+        } catch (e) {
+          console.warn("Failed to rewrite channelStateUrl origin:", e);
+        }
       }
 
-      const serviceOriginKey = config.serviceOrigin ?? new URL(channelStateUrl).origin;
-      const serviceKey = `${config.account.address.toLowerCase()}:${serviceOriginKey}:${request.chainId}:${request.currency}`;
+      const serviceOriginKey = new URL(channelStateUrl).origin;
+      const serviceKey = `${config.account.address.toLowerCase()}:${serviceOriginKey}:${request.chainId}:${request.currency.toLowerCase()}`;
       let channelAddress = serviceChannels.get(serviceKey);
 
       if (!channelAddress) {
@@ -93,7 +95,22 @@ export function raycash (config: RaycashClientConfig): any {
               lastCumulative?: string;
             };
 
+            if (!createData.channelAddress) {
+              throw new Error("Channel-state response missing channelAddress");
+            }
             const addr = createData.channelAddress as Address;
+
+            // Validate channel-state response matches the 402 challenge
+            if (createData.chainId !== undefined && createData.chainId !== request.chainId) {
+              throw new Error(
+                `Channel-state chainId (${createData.chainId}) does not match challenge chainId (${request.chainId})`,
+              );
+            }
+            if (createData.underlying !== undefined && createData.underlying.toLowerCase() !== request.currency.toLowerCase()) {
+              throw new Error(
+                `Channel-state underlying (${createData.underlying}) does not match challenge currency (${request.currency})`,
+              );
+            }
 
             if (createData.lastCumulative) {
               channelCumulatives.set(cumulativeKey(config.account.address as Address, addr), BigInt(createData.lastCumulative));
@@ -101,9 +118,9 @@ export function raycash (config: RaycashClientConfig): any {
 
             await config.onFundChannel({
               channelAddress: addr,
-              underlying: (createData.underlying ?? request.currency) as Address,
-              minDeposit: createData.minDeposit ?? request.minDeposit,
-              chainId: createData.chainId ?? request.chainId,
+              underlying: request.currency as Address,
+              minDeposit: request.minDeposit,
+              chainId: request.chainId,
             });
 
             serviceChannels.set(serviceKey, addr);

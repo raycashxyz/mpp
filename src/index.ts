@@ -1,2 +1,2 @@
-export { raycashChannel } from "./method";
-export type { RaycashChannelMethod } from "./method";
+export { raycashChannel } from "./method.js";
+export type { RaycashChannelMethod } from "./method.js";
