@@ -17,6 +17,7 @@ import type { Challenge } from "mppx";
 import { raycashChannel } from "../method.js";
 
 const serviceChannels = new Map<string, Address>();
+const channelWrappers = new Map<string, Address>();
 const channelCumulatives = new Map<string, bigint>();
 const pendingCreations = new Map<string, Promise<Address>>();
 const pendingVouchers = new Map<string, Promise<string>>();
@@ -93,6 +94,8 @@ export function raycash (config: RaycashClientConfig): any {
               minDeposit?: string;
               chainId?: number;
               lastCumulative?: string;
+              /** MPPWrapper address — used as verifyingContract in EIP-712 domain. */
+              factoryAddress?: string;
             };
 
             if (!createData.channelAddress) {
@@ -124,6 +127,9 @@ export function raycash (config: RaycashClientConfig): any {
             });
 
             serviceChannels.set(serviceKey, addr);
+            if (createData.factoryAddress) {
+              channelWrappers.set(addr.toLowerCase(), createData.factoryAddress as Address);
+            }
             return addr;
           })();
 
@@ -173,12 +179,20 @@ export function raycash (config: RaycashClientConfig): any {
           throw new Error("Account does not support signTypedData");
         }
 
+        // Use the MPPWrapper as verifyingContract (from channel-state factoryAddress).
+        const wrapperAddress = channelWrappers.get(channelAddress.toLowerCase());
+        if (!wrapperAddress) {
+          throw new Error(
+            "Channel-state response missing factoryAddress — cannot sign voucher. " +
+            "The server must return factoryAddress in the channel-state response.",
+          );
+        }
         const signature = await config.account.signTypedData({
           domain: {
-            name: "MPPChannel",
+            name: "MPPWrapper",
             version: "1",
             chainId: request.chainId,
-            verifyingContract: channelAddress,
+            verifyingContract: wrapperAddress,
           },
           types: {
             Voucher: [{

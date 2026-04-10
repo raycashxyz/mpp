@@ -1,6 +1,6 @@
 {
   "name": "@raycash/mpp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Machine Payments Protocol SDK — pay-per-call API monetization with confidential payment channels",
   "type": "module",
   "main": "./dist/index.js",
